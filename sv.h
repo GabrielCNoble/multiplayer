@@ -9,10 +9,8 @@
 
 #define SV_CONNECT_PORT 1313
 #define SV_FRAME_PORT 6969
-
-#define SV_MAX_PLAYERS 64
+#define SV_MAX_CLIENTS 64
 #define SV_MAX_MESSAGE_LEN 8192
-
 #define SV_PLAYER_NAME_MAX_LEN 64
 
 
@@ -31,6 +29,7 @@ struct sv_client_t
     TCPsocket connect_socket;
     char *name;
     uint64_t last_update;
+    uint32_t join_list_index;
 };
 
 enum SV_MESSAGE_TYPE
@@ -90,8 +89,11 @@ struct sv_sync_frames_t
     struct sv_player_frame_t frames[];
 };
 
+#define SV_SYNC_FRAMES_SIZE(client_count) (sizeof(struct sv_sync_frames_t)+sizeof(struct sv_player_frame_t)*client_count)
+
 struct sv_sync_join_data_t
 {
+    struct sv_message_t base;
     char name[SV_PLAYER_NAME_MAX_LEN];
     struct sv_client_t *client;
 };
@@ -103,14 +105,53 @@ struct sv_sync_join_t
 };
 
 
+
+
+
+struct sv_sync_client_join_item_t
+{
+    char name[SV_PLAYER_NAME_MAX_LEN];
+    struct sv_client_t *client;
+};
+
+struct sv_sync_client_join_list_t
+{
+    uint32_t client_count;
+    struct sv_sync_client_join_item_t clients[];
+};
+
+struct sv_sync_client_drop_item_t
+{
+    struct sv_client_t *client;
+};
+
+struct sv_sync_client_drop_list_t
+{
+    uint32_t client_count;
+    struct sv_sync_client_drop_item_t clients[];
+};
+
+enum SV_SYNC_CLIENT_TYPE
+{
+    SV_SYNC_CLIENT_TYPE_JOIN = 0,
+    SV_SYNC_CLIENT_TYPE_DROP
+};
+
+struct sv_sync_client_t
+{
+    struct sv_message_t base;
+    uint32_t type;
+    char data[];
+};
+
+#define SV_SYNC_CLIENT_JOIN_SIZE(client_count) (sizeof(struct sv_sync_client_t)+sizeof(struct sv_sync_client_join_list_t)+sizeof(struct sv_sync_client_join_item_t)*client_count)
+#define SV_SYNC_CLIENT_DROP_SIZE(client_count) (sizeof(struct sv_sync_client_t)+sizeof(struct sv_sync_client_drop_list_t)+sizeof(struct sv_sync_client_drop_item_t)*client_count)
+
+#define SV_SYNC_CLIENT_MAX_SIZE (SV_SYNC_CLIENT_JOIN_SIZE(SV_MAX_CLIENTS)>SV_SYNC_CLIENT_DROP_SIZE(SV_MAX_CLIENTS)?SV_SYNC_CLIENT_JOIN_SIZE(SV_MAX_CLIENTS):SV_SYNC_CLIENT_DROP_SIZE(SV_MAX_CLIENTS))
+
+
 void sv_Init();
 
 void sv_RunServer(uint32_t local);
-
-void sv_SendMessage(uint32_t type, struct sv_message_t *message);
-
-
-
-struct g_player_t *sv_CreatePlayer();
 
 #endif // SV_H

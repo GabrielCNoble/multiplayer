@@ -47,6 +47,7 @@ struct g_player_t *g_CreatePlayer(uint32_t type, vec2_t *position)
     else
     {
         g_last_player->next = player;
+        player->prev = g_last_player;
     }
     
     g_last_player = player;
@@ -57,6 +58,32 @@ struct g_player_t *g_CreatePlayer(uint32_t type, vec2_t *position)
     }
     
     return player;
+}
+
+void g_DestroyPlayer(struct g_player_t *player)
+{
+    if(player)
+    {
+        if(player->next)
+        {
+            player->next->prev = player->prev;
+        }
+        else
+        {
+            g_last_player = g_last_player->prev;
+        }
+        
+        if(player->prev)
+        {
+            player->prev->next = player->next;
+        }
+        else
+        {
+            g_players = g_players->next;
+        }
+        
+        free(player);
+    }
 }
 
 void g_UpdatePlayers()

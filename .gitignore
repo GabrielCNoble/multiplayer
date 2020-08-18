@@ -1,0 +1,9 @@
+*.exe
+*.dll
+*.cbp
+*.depend
+*.layout
+*.o
+*.rar
+SDL
+ubuntu

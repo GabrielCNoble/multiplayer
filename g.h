@@ -16,6 +16,7 @@ enum G_PLAYER_TYPE
 struct g_player_t
 {
     struct g_player_t *next;
+    struct g_player_t *prev;
     struct sv_client_t *client;
     uint32_t type;
     vec2_t position;
@@ -25,6 +26,8 @@ struct g_player_t
 void g_Init();
 
 struct g_player_t *g_CreatePlayer(uint32_t type, vec2_t *position);
+
+void g_DestroyPlayer(struct g_player_t *player);
 
 void g_UpdatePlayers();
 
