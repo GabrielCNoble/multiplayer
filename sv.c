@@ -1,4 +1,5 @@
 #include "sv.h"
+#include "t.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -43,7 +44,8 @@ void sv_RunServer(uint32_t local)
     
     while(1)
     {
-        SDL_Delay(40);
+//        SDL_Delay(40);
+        float delta_time = 0.0;
         struct sv_client_t *new_clients = NULL;
         struct sv_client_t *last_new_client = NULL;
         uint32_t new_client_count = 0;
@@ -93,15 +95,28 @@ void sv_RunServer(uint32_t local)
             packet.data = (uint8_t *)&player_frame;
             packet.maxlen = sizeof(struct sv_player_frame_t);
             
-            while(SDLNet_UDP_Recv(sv_frame_socket, &packet))
+            while((delta_time += t_DeltaTime()) < 0.008)
             {
-                /* gather frames from clients already connected before this frame */
-                struct sv_player_frame_t *frame = (struct sv_player_frame_t *)packet.data;
-                frame->client->address = packet.address;
-                frame->client->last_update = sv_frame;
-                sv_sync_frames->frames[sv_sync_frames->frame_count].frame = frame->frame;
-                sv_sync_frames->frames[sv_sync_frames->frame_count].client = frame->client;
-                sv_sync_frames->frame_count++;
+                /* pool frames for 8ms */
+                while(SDLNet_UDP_Recv(sv_frame_socket, &packet))
+                {
+                    /* gather frames from clients already connected before this frame */
+                    struct sv_player_frame_t *frame = (struct sv_player_frame_t *)packet.data;
+                    frame->client->address = packet.address;
+                    frame->client->last_update = sv_frame;
+                    uint32_t frame_index;
+                    
+                    if(frame->client->frame_list_index == 0xffffffff)
+                    {
+                        frame->client->frame_list_index = sv_sync_frames->frame_count;
+                        sv_sync_frames->frame_count++;
+                    }
+                    
+                    frame_index = frame->client->frame_list_index;
+                    
+                    sv_sync_frames->frames[frame_index].frame = frame->frame;
+                    sv_sync_frames->frames[frame_index].client = frame->client;
+                }
             }
         }
         
@@ -116,6 +131,7 @@ void sv_RunServer(uint32_t local)
         
         while(client)
         {
+            client->frame_list_index = 0xffffffff;
             if(sv_frame - client->last_update > 50)
             {
                 /* it's been long since this client last communicated with the server,
@@ -250,8 +266,9 @@ void sv_RunServer(uint32_t local)
             }
             
             sv_last_client = last_new_client;
-            
         }
+        
+        while((delta_time += t_DeltaTime()) < 0.016);
         
         sv_frame++;
     }

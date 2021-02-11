@@ -6,6 +6,7 @@
 
 #include "sv.h"
 #include "cl.h"
+#include "t.h"
 
 int main(int argc, char *argv[])
 {
@@ -46,6 +47,8 @@ int main(int argc, char *argv[])
         printf("error initializing SDL_net: %s\n", SDLNet_GetError());
         return -2;
     }
+    
+    t_Init();
     
     if(server)
     {

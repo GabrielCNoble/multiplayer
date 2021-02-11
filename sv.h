@@ -30,6 +30,7 @@ struct sv_client_t
     char *name;
     uint64_t last_update;
     uint32_t join_list_index;
+    uint32_t frame_list_index;
 };
 
 enum SV_MESSAGE_TYPE

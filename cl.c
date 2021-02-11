@@ -3,7 +3,9 @@
 #include "cl.h"
 #include "sv.h"
 #include "g.h"
+#include "t.h"
 #include "SDL2/SDL_net.h"
+
 
 UDPsocket cl_player_socket;
 TCPsocket cl_connect_socket;
@@ -15,7 +17,6 @@ uint32_t sv_got_response = 1;
 struct sv_sync_frames_t *cl_sync_frames;
 struct sv_ack_t *cl_connect_status;
 struct sv_sync_client_t *cl_sync_client;
-//struct sv_sync_join_t *cl_sync_join;
 IPaddress cl_sync_join_address;
 
 extern struct g_player_t *g_players;
@@ -33,14 +34,19 @@ void cl_Init()
 
 void cl_RunClient()
 {    
+    t_DeltaTime();
     while(1)
     {
+        float delta_time = t_DeltaTime();
         cl_SyncClients();
         cl_SyncFrames();
-        g_UpdatePlayers();
-        cl_SendPlayerFrame(g_main_player);
         g_BeginDraw();
+        g_PlayerInput(0.0166);
+        cl_SendPlayerFrame(g_main_player);
+        g_UpdatePlayers(0.0166);
+        g_UpdateCamera(0.0166);        
         g_DrawPlayers();
+        g_DrawTiles();
         g_EndDraw();
     }
 }
@@ -131,7 +137,7 @@ void cl_SendPlayerFrame(struct g_player_t *player)
     struct sv_player_frame_t frame;
     UDPpacket packet;
     
-    if(sv_got_response)
+//    if(sv_got_response)
     {
         frame.client = cl_client;
         frame.frame.position = player->position;
