@@ -54,7 +54,8 @@ void g_Init()
     SDL_RenderClear(g_renderer);
     
     g_CreatePlayer(G_PLAYER_TYPE_CONTROLLED, &(vec2_t){40.0, 80.0});
-    g_CreateTile(&(vec2_t){0.0, 0.0}, &(vec2_t){80.0, 20.0}, 0.0);
+    g_CreateTile(&(vec2_t){0.0, 0.0}, &(vec2_t){4000.0, 20.0}, 0.0);
+//    g_CreateTile(&(vec2_t){85.0, 0.0}, &(vec2_t){80.0, 20.0}, 0.0);
 //    g_CreateTile(&(vec2_t){-40.0, 0.0}, &(vec2_t){80.0, 20.0}, -0.08);
 
     g_BuildDbvh();

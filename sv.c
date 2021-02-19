@@ -132,7 +132,7 @@ void sv_RunServer(uint32_t local)
         while(client)
         {
             client->frame_list_index = 0xffffffff;
-            if(sv_frame - client->last_update > 50)
+            if(sv_frame - client->last_update > 600)
             {
                 /* it's been long since this client last communicated with the server,
                 so drop it */

@@ -59,16 +59,17 @@ int main(int argc, char *argv[])
     {
         if(!local)
         {
-            while(1)
-            {
-                printf("what's the server's address?\n>>> ");
-                fgets(server_address_str, sizeof(server_address_str), stdin);
-                uint32_t index = 0;
-                while(server_address_str[index] != '\n') index++;
-                server_address_str[index] = '\0';
-                server_address = server_address_str;
-                break;
-            }
+//            while(1)
+//            {
+//                printf("what's the server's address?\n>>> ");
+//                fgets(server_address_str, sizeof(server_address_str), stdin);
+//                uint32_t index = 0;
+//                while(server_address_str[index] != '\n') index++;
+//                server_address_str[index] = '\0';
+//                server_address = server_address_str;
+//                break;
+//            }
+            server_address = "104.248.118.114";
         }
         
         while(1)
